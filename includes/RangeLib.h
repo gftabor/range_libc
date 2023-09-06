@@ -43,7 +43,12 @@ Useful Links: https://github.com/MRPT/mrpt/blob/4137046479222f3a71b5c00aee1d5fa8
 #include <chrono>
 #include <set>
 #include <iomanip>      // std::setw
+
+#ifdef _WIN32
+#include <io.h>
+#else
 #include <unistd.h>
+#endif
 #include <stdexcept>
 #include <sstream>
 // #define NDEBUG
@@ -263,9 +268,9 @@ namespace ranges {
 
 		bool save(std::string filename) {
 			std::vector<unsigned char> png;
-			lodepng::State state; //optionally customize this one
 			// char image = new char[width * height * 4] = 0;
-			char image[width * height * 4];
+			std::vector<unsigned char> image(width * height * 4);
+
 
 			for (int y = 0; y < height; ++y) {
 				for (int x = 0; x < width; ++x) {
@@ -283,7 +288,7 @@ namespace ranges {
 					}
 				}
 			}
-			unsigned error = lodepng::encode(png, reinterpret_cast<const unsigned char*> (image), width, height, state);
+			unsigned error = lodepng::encode(png,image, width, height);
 			if(!error) lodepng::save_file(png, filename);
 			//if there's an error, display it
 			if(error) std::cout << "encoder error " << error << ": "<< lodepng_error_text(error) << std::endl;
@@ -375,7 +380,7 @@ namespace ranges {
 		bool save(std::string filename) {
 			std::vector<unsigned char> png;
 			lodepng::State state; 
-			char image[width * height * 4];
+			std::vector<unsigned char> image(width * height * 4);
 
 			float scale = 0;
 			for (int y = 0; y < height; ++y) {
@@ -397,7 +402,7 @@ namespace ranges {
 					image[idx + 3] = (char)255;
 				}
 			}
-			unsigned error = lodepng::encode(png, reinterpret_cast<const unsigned char*> (image), width, height, state);
+			unsigned error = lodepng::encode(png,image, width, height);
 			if(!error) lodepng::save_file(png, filename);
 			//if there's an error, display it
 			if(error) std::cout << "encoder error " << error << ": "<< lodepng_error_text(error) << std::endl;
